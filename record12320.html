@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<!-- 注意修改项 -->
+
+		<title id = "title"></title>
+
+		<link rel="stylesheet" href="css/common.css" />
+		<link rel="stylesheet" href="css/c.css" />
+
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js" ></script>
+		<script src="//api.map.baidu.com/api?v=2.0&ak=iLGV96k58C2lvv3joHvVGog9&s=1" type="text/javascript"></script>
+		<script type="text/javascript" src="js/common.js" ></script>
+		<script type="text/javascript" src="js/c.js" ></script>
+		
+		<script type="text/javascript">
+			var page = {
+				url:'/s/wechat/question/getManageById',
+				topicUrl:'/s/wechat/question/getQuestionTopic',
+				phoneValidateUrl:'/s/sms/sendSmsByPhoneNumber',
+				saveUrl:'/s/wechat/question/saveWechatQuestion',	
+				posUrl:'/pos/getCurrPosHospital',
+				validateUrl:getValidateUrl(),
+				jumpTopicFlag:[],
+				jumpSubject:[],
+				x:0,
+				y:0,
+				yflag:true,
+				pageIndex:1,
+				pageSize:2,
+				phoneTempFlag:true,
+				pflag:{//进度条标志对象
+					length:function(){
+						var index = 0;
+						for(i in this){
+							if(i != "afidSelectHospital" && i != "afids2"){
+								index++;
+							}
+						}
+						index--;
+						return index;
+					}
+				},
+				progressFlag:{
+					length:function(){
+						var index = 0;
+						for(i in this){
+							if(i != "afidSelectHospital" && i != "afids2"){
+								index++;
+							}
+						}
+						index--;
+						return index;
+					}
+				},
+				pageParams:{
+					
+				},
+				pflagSize:20,//有多少题目需要参与计算进度
+				pflagtemp:{},
+				nextFlag : {
+					length:function(){
+						var index = 0;
+						for(i in this){
+							index++;
+						}
+						index--;
+						return index;
+					}
+				},
+				hospitals:null,
+				questions:null,
+				uuids:{},
+				saveData:{
+					imageCode:'',
+					smsCode:'',
+					manageId:'',
+					manageName:'',
+					typeId:'',
+					typeName:'',
+					questionId:'',
+					questionName:'',
+					questionType:'',
+					hospitalId:'',
+					latitude:'',
+					longitude:'',
+					hospitalName:'',
+					sex:'',
+					name:'',
+					education:'',
+					channelCode:'',
+					pay:'',
+					medicalRecord:'',
+					telephone:'',
+					awardStatus:'',
+					result1: '',
+					result2: '',
+					result3: '',
+					result4: '',
+					result5: '',
+					result6: '',
+					result7: '',
+					result8: '',
+					result9: '',
+					result10: '',
+					result11: '',
+					result12: '',
+					result13: '',
+					result14: '',
+					result15: '',
+					result16: '',
+					result17: '',
+					result18: '',
+					result19: '',
+					result20: '',
+					result21: '',
+					result22: '',
+					result23: '',
+					result24: '',
+					result25: '',
+					result26: '',
+					result27: '',
+					result28: '',
+					result29: '',
+					result30: '',
+					result31: '',
+					result32: '',
+					result33: '',
+					result34: '',
+					result35: '',
+					result36: '',
+					result37: '',
+					result38: '',
+					result39: '',
+					result40: '',
+					result41: '',
+					result42: '',
+					result43: '',
+					result44: '',
+					result45: '',
+					result46: '',
+					result47: '',
+					result48: '',
+					result49: '',
+					result50: ''
+				}
+			}
+			$(function(){
+				//initLocalQuestion();
+				//sessionStorage.setItem("index","index");
+				init();
+				getPosition();
+			});
+			
+			function initLocalQuestion(){
+				page.questions = [];
+				for(i in questionsHead){
+					var item = questionsHead[i];
+					page.questions.push(item);
+				}
+				
+				for(i in questionsFooter){
+					var item = questionsFooter[i];
+					page.questions.push(item);
+				}
+			}
+			function initEvent(){
+				
+					
+				page.windowHeight = $(window).height();
+				document.addEventListener('touchstart',function(event){
+					var aevent = event || window.event;  
+					//aevent.preventDefault();  
+					var touch = aevent.touches[0];
+					page.x = touch.pageX;
+					page.y = touch.pageY;
+				}, true);  
+				$(window).resize(function(){
+					var cWindowHeight = $(window).height();
+					var sc = $('#subjectContainer');
+					if(cWindowHeight != page.windowHeight){
+						if(page.y > 200){
+							page.yFlag = true;
+							sc.scrollTop(130,0);
+						}
+					}else{
+						if(page.yFlag){
+							page.yFlag = false;
+							sc.scrollTop(0,0);
+						}
+					}
+					
+				});
+				
+				$('i.radio').parent().on('click',function(){
+					var self = $(this);
+					
+					if(self.parent().hasClass('subject-answer-container-skip')){
+						return;
+					}
+					
+					var dataid = self.attr('dataid');
+					if(!Common.isEmpty(dataid)){
+						var data = page.uuids[dataid]
+						if(!Common.isEmpty(data.questionId) && !Common.isEmpty(data.manageId)){
+							loadRemoteSubject(data,self);
+							return;
+						}
+					}
+					
+					self.parent().find('i.radio').removeClass('active');
+					self.find('i.radio').addClass('active');
+					var afid = self.parent().parent().attr('afid');
+					var dataid = self.attr('dataid');
+					var data = page.uuids[dataid];
+					
+					if(!Common.isEmpty(data.jumpNumber)){
+						handleJumpTopic(data);
+					}else{
+						delJumpModule(data);
+					}
+					
+					page.pflag['afid' + afid] = self.find('i.radio').attr('index');
+					if(afid != 's2'){
+						page.saveData['result' + afid] = data.optionNumber;
+					}else{
+						page.saveData.questionId = data.questionId;
+						page.saveData.typeId = data.typeId;
+					}
+					
+					if(!Common.isEmpty(data.isFix)){
+						page.saveData[data.fixFeild] = data.option;
+					}
+					
+					if(data.isMust == '1'){
+						page.nextFlag['afid' + afid] = afid;
+						page.progressFlag['afid' + afid] = afid;
+					}
+					progressEvent();
+					
+					
+				});
+				
+				$('i.checkbox').parent().on('click',function(){
+					var self = $(this);
+					var c = self.find('i.checkbox');
+					var afid = self.parent().parent().attr('afid');
+					var dataid = self.attr('dataid');
+					
+					var dataid = self.attr('dataid');
+					var data = page.uuids[dataid];
+					
+					if(c.hasClass('active')){
+						c.removeClass('active');
+						delete page.pflag['afid' + afid]['dataid' + dataid];
+						handleDelCheckboxValue(afid,data);
+					}else{
+						handleCheckboxValue(afid,data);
+						c.addClass('active');
+						if(Common.isEmpty(page.pflag['afid' + afid])){
+							page.pflag['afid' + afid] = {};
+						}
+						page.pflag['afid' + afid]['dataid' + dataid] = c.attr('index');
+						if(data.isMust == '1'){
+							page.nextFlag['afid' + afid] = afid;
+						}
+					}
+					
+					if(self.parent().parent().find('i.checkbox.active').length == 0){
+						delete page.pflag['afid' + afid];
+						delete page.progressFlag['afid' + afid];
+						delete page.nextFlag['afid'+afid];
+					}
+					
+					progressEvent();
+				});
+				
+
+				$('.weiwei-input').on('blur',function(){
+					var self = $(this);
+					var v = self.val();
+					var afid = self.attr('afid');
+					var dataid = self.attr('dataid');
+					var inputData = page.uuids[dataid];
+					
+					if(inputData.fixFeild == 'medicalRecord'){
+						page.saveData.medicalRecord = v;
+					}else if(!Common.isEmpty(inputData.requireValidate)){
+						page.saveData.telephone = v;
+					}else{
+						page.saveData['result' + afid] = v;
+					}
+					
+					if(!Common.isEmpty(v)){
+						page.pflagtemp['afid' + afid] = v;
+						if(inputData.isMust == '1'){
+							page.nextFlag['afid'+afid] = afid;
+						}
+						page.pflag['afid' + afid] = afid;
+						if(inputData.isMust == '1'){
+							page.progressFlag['afid' + afid] = afid;
+						}
+						
+						self.addClass('active');
+					}else{
+						delete page.pflagtemp['afid' + afid];
+						delete page.nextFlag['afid'+afid];
+						delete page.pflag['afid' + afid];
+						self.removeClass('active');
+					}
+					progressEvent();
+
+					if(!Common.isEmpty(inputData.requireValidate)){
+						var validatev = $('.mvalidate-input').val();
+						if(!Common.isEmpty(v) && Common.isEmpty(validatev)){
+							page.phoneTempFlag = false;
+							$('#submit').removeClass('active').attr('disabled','disabled');
+						}else{
+							page.phoneTempFlag = true;
+							$('#submit').addClass('active').removeAttr('disabled');
+						}
+					}
+					if(!page.phoneTempFlag){
+						$('#submit').removeClass('active').attr('disabled','disabled');
+					}
+				});
+				
+				$('.weiwei-input').on('input',function(){
+					var self = $(this);
+					var v = self.val();
+					var afid = self.attr('afid');
+					var dataid = self.attr('dataid');
+					var inputData = page.uuids[dataid];
+					
+					if(inputData.fixFeild == 'medicalRecord'){
+						page.saveData.medicalRecord = v;
+					}else if(!Common.isEmpty(inputData.requireValidate)){
+						page.saveData.telephone = v;
+					}else{
+						page.saveData['result' + afid] = v;
+					}
+					
+					if(!Common.isEmpty(v)){
+						page.pflagtemp['afid' + afid] = v;
+						if(inputData.isMust == '1'){
+							page.nextFlag['afid'+afid] = afid;
+						}
+						page.pflag['afid' + afid] = afid;
+						if(inputData.isMust == '1'){
+							page.progressFlag['afid' + afid] = afid;
+						}
+						
+						self.addClass('active');
+					}else{
+						delete page.pflagtemp['afid' + afid];
+						delete page.nextFlag['afid'+afid];
+						delete page.pflag['afid' + afid];
+						self.removeClass('active');
+					}
+					progressEvent();
+
+					if(!Common.isEmpty(inputData.requireValidate)){
+						var validatev = $('.mvalidate-input').val();
+						if(!Common.isEmpty(v) && Common.isEmpty(validatev)){
+							page.phoneTempFlag = false;
+							$('#submit').removeClass('active').attr('disabled','disabled');
+						}else{
+							page.phoneTempFlag = true;
+							$('#submit').addClass('active').removeAttr('disabled');
+						}
+					}
+					if(!page.phoneTempFlag){
+						$('#submit').removeClass('active').attr('disabled','disabled');
+					}
+				});
+
+				$('.mvalidate-input').on('blur',function(){
+					var v = $(this).parent().parent().find('.weiwei-input').val();
+					var validatev = $('.mvalidate-input').val();
+					if(!Common.isEmpty(v) && Common.isEmpty(validatev)){
+						page.phoneTempFlag = false;
+						$('#submit').removeClass('active').attr('disabled','disabled');
+					}else{
+						page.phoneTempFlag = true;
+						$('#submit').addClass('active').removeAttr('disabled');
+					}
+					page.saveData.smsCode = validatev;
+				});
+				
+				$('.mvalidate-input').on('input',function(){
+					var v = $(this).parent().parent().find('.weiwei-input').val();
+					var validatev = $('.mvalidate-input').val();
+					if(!Common.isEmpty(v) && Common.isEmpty(validatev)){
+						page.phoneTempFlag = false;
+						$('#submit').removeClass('active').attr('disabled','disabled');
+					}else{
+						page.phoneTempFlag = true;
+						$('#submit').addClass('active').removeAttr('disabled');
+					}
+				});
+
+				$('.r-select').on('change',function(){
+					var self = $(this);
+					var afid = self.attr('afid');
+					if(Common.isEmpty(afid)){
+						return;
+					}
+					
+					var v = self.val();
+					page.saveData['result' + afid] = v;
+					page.pflag['afid' + afid] = v;
+					delFirstchild($(this));
+					
+					var dataid = self.find('option:selected').attr('dataid');
+					var data = page.uuids[dataid]
+					if(data.isMust == '1'){
+						page.progressFlag['afid' + afid] = afid;
+						page.nextFlag['afid'+afid] = afid;
+					}
+					
+					if(!Common.isEmpty(data.jumpNumber)){
+						handleJumpTopic(data);
+					}else{
+						delJumpModule(data);
+					}
+					
+					self.addClass('active');
+					progressEvent();
+				});
+
+				$('.get-validate-btn').on('click',function(){
+					var self = $(this);
+					var phone = self.parent().parent().find('input:eq(0)').val();
+					var mRex = /^\d{11}$/;
+					if(Common.isEmpty(phone) || !mRex.test(phone)){
+						Common.tips('请输入正确的手机号!');
+						return;
+					}
+					sentPhoneValidate(phone,function(){
+						self.addClass('disabled');
+						self.attr('disabled','disabled');
+						page.intervalTime = 59;
+						self.text(page.intervalTime + '秒后重试');
+						page.intervals = setInterval(function(){
+	
+							if(page.intervalTime == 0){
+								clearInterval(page.intervals);
+								self.text('获取验证码');
+								self.removeClass('disabled');
+								self.removeAttr('disabled');
+								return;
+							}
+							page.intervalTime--;
+							self.text(page.intervalTime + '秒后重试');
+						},1000);
+					});
+				});
+			}
+			
+			function handleJumpTopic(data){
+				delJumpModule(data);
+				var t = parseInt(data.topicNumber) + 1
+				var jsize = parseInt(data.jumpNumber);
+				
+				var item = {
+					beginJumpIndex:t,
+					endJumpIndex:jsize,
+					topicId:data.topicId
+				}
+				page.jumpTopicFlag.push(item);
+				for(var i = t; i < jsize; i++){
+					page.jumpSubject.push(i)
+				}
+				clearPageVisibleJumpTopic();
+			}
+			
+			function clearPageVisibleJumpTopic(){
+				var pageTopicDoms = $('.topicNumber');
+				var tmpFlag = true;
+				for(i in page.jumpSubject){
+					var jumpItem = page.jumpSubject[i];
+					for(var j = 0;j < pageTopicDoms.length; j++){
+						var domItem = $(pageTopicDoms[j]);
+						var text = domItem.text();
+						var afid = domItem.parent().parent().attr('afid');
+						if(text == jumpItem){
+							delete page.pflag['afid' + afid];
+							delete page.progressFlag['afid' + afid];
+							domItem.parent().addClass('subject-title-skip');
+							var adom = domItem.parent().parent().find('.subject-answer-container');
+							domItem.parent().find('.require-star').addClass('require-star-empty').removeClass('require-star');
+							adom.addClass('subject-answer-container-skip');
+							adom.removeClass('subject-answer-container');
+							var sdom = adom.find('select');
+							if(sdom.length > 0){
+								sdom.attr('disabled','disabled');
+								var firstOption = sdom.find('option:eq(0)');
+								if(firstOption.attr('value') != '-1'){
+									sdom.prepend('<option value = "-1">请选择</option>');
+								}
+								sdom.val('-1');
+							}
+							adom.find('.active').removeClass('active');
+							tmpFlag = false;
+						}
+					}
+					delete page.pflag['afid' + jumpItem];
+					page.saveData['result' + jumpItem] = '';
+					delete page.progressFlag['afid' + jumpItem];
+					delete page.nextFlag['afid' + jumpItem];
+				}
+				if(tmpFlag){
+					pageTopicDoms.parent().find('.require-star-empty').addClass('require-star').removeClass('require-star-empty');
+					pageTopicDoms.parent().removeClass('subject-title-skip');
+					pageTopicDoms.parent().parent().find('.subject-answer-container-skip').addClass('subject-answer-container').removeClass('subject-answer-container-skip');
+					pageTopicDoms.parent().parent().find('select').removeAttr('disabled');
+				}
+			}
+			
+			function delJumpModule(data){
+				var tmpTopicIndex = -1;
+				for(var i = 0;i<page.jumpTopicFlag.length;i++){
+					var item = page.jumpTopicFlag[i];
+					if(data.topicId == item.topicId){
+						for(var j = item.beginJumpIndex; j < item.endJumpIndex; j++){
+							var tmpIndex = -1;
+							for(var t = 0;t < page.jumpSubject.length;t++){
+								var sitem = page.jumpSubject[t];
+								if(sitem == j){
+									tmpIndex = t;
+								}
+							}
+							removeArrayEleByIndex(page.jumpSubject,tmpIndex);
+						}
+						tmpTopicIndex = tmpTopicIndex;
+					}
+				}
+				removeArrayEleByIndex(page.jumpTopicFlag,tmpTopicIndex);
+				clearPageVisibleJumpTopic();
+			}
+			
+			function handleCheckboxValue(afid,data){
+				var vs = page.saveData['result' + afid];
+				if(Common.isEmpty(vs)){
+					page.saveData['result' + afid] = [];
+				}else{
+					for(var i = 0;i<vs.length;i++){
+						if(vs[i] == data.optionNumber){
+							return;
+						}
+					}
+				}
+				page.saveData['result' + afid].push(data.optionNumber);
+			}
+			function handleDelCheckboxValue(afid,data){
+				var vs = page.saveData['result' + afid];
+				if(Common.isEmpty(vs)){
+					page.saveData['result' + afid] = [];
+				}else{
+					for(var i = 0;i<vs.length;i++){
+						if(vs[i] == data.optionNumber){
+							removeArrayEleByIndex(page.saveData['result' + afid],i)
+							return;
+						}
+					}
+				}
+			}
+			
+			function sentPhoneValidate(phone,callback){
+				var url = Common.interfacePrefix() + page.phoneValidateUrl;
+				var data = {
+					phoneNumber:phone
+				}
+				Common.ajax(url,data,true,function(result){
+					if(result.resultCode != "0"){
+						Common.tips(result.resultMsg);
+					}else{
+						callback();
+					}
+				})
+			}
+			function getDomUUid(uuid){
+				if(Common.isEmpty(uuid)){
+					var rid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+				        return v.toString(16);
+				    });
+			        uuid = rid;
+				}
+				
+				return uuid;
+				
+			}
+			
+			function loadRemoteSubject(data,self){
+				clearSubject();
+				var url = Common.interfacePrefix() + page.topicUrl;
+				page.saveData.manageId = data.manageId;
+				var data = {
+					manageId:data.manageId,
+					questionId:data.questionId
+				}
+				Common.ajax(url,data,false,function(result){
+					if(result.resultCode == "0"){
+						var data = result.dataList;
+						
+						for(var i = 0;i < data.length;i++){
+							subjects.push(data[i]);
+						}
+						
+						if(data.length % 2 == 1){
+							var empty = {
+							    topicNumber:"",
+							    type:"0", //1.单选 2.多选 3。填空  4.special  5、医院
+							    topic:""
+							}							
+							subjects.push(empty)
+						}
+						
+						var suffix = subjects[subjects.length - 1].topicNumber;
+						if(Common.isEmpty(suffix)){
+							suffix = subjects[subjects.length - 2].topicNumber;
+						}
+						for(var i = 0;i < fixSubjects.length;i++){
+							var item = fixSubjects[i];
+							item.topicNumber = suffix + i + 1;
+							subjects.push(item);
+						}
+						
+						var dataid = self.attr('dataid');
+						self.parent().find('i.radio').removeClass('active');
+						self.find('i.radio').addClass('active');
+						var afid = self.parent().parent().attr('afid');
+						var dataid = self.attr('dataid');
+						var data = page.uuids[dataid];
+						
+						if(!Common.isEmpty(data.jumpNumber)){
+							handleJumpTopic(data);
+						}else{
+							delJumpModule(data);
+						}
+						
+						page.pflag['afid' + afid] = self.find('i.radio').attr('index');
+						if(afid != 's2'){
+							page.saveData['result' + afid] = data.optionNumber;
+						}else{
+							page.saveData.questionId = data.questionId;
+							page.saveData.typeId = data.typeId;
+						}
+						
+						if(!Common.isEmpty(data.isFix)){
+							page.saveData[data.fixFeild] = data.option;
+						}
+						
+						if(data.isMust == '1'){
+							page.nextFlag['afid' + afid] = afid;
+						}
+						progressEvent();
+					}
+				})
+			}
+			
+			function clearSubject(){
+				subjects = [];
+				for(i in headSubjects){
+					subjects.push(headSubjects[i]);
+				}
+				
+				page.pflag = {//进度条标志对象
+					afidSelectHospital:page.pflag.afidSelectHospital,
+					afids2:page.pflag.afids2,
+					length:function(){
+						var index = 0;
+						for(i in this){
+							if(i != "afidSelectHospital" && i != "afids2"){
+								index++;
+							}
+						}
+						index--;
+						return index;
+					}
+				}
+				
+				page.progressFlag = {
+					length:function(){
+						var index = 0;
+						for(i in this){
+							if(i != "afidSelectHospital" && i != "afids2"){
+								index++;
+							}
+						}
+						index--;
+						return index;
+					}
+				}
+				
+				page.saveData = {
+					imageCode:'',
+					smsCode:'',
+					manageId:'',
+					manageName:'',
+					typeId:'',
+					typeName:'',
+					questionId:'',
+					questionName:'',
+					hospitalId:page.saveData.hospitalId,
+					latitude:page.saveData.latitude,
+					longitude:page.saveData.longitude,
+					channelCode:page.saveData.channelCode,
+					questionType:page.saveData.questionType,
+					hospitalName:'',
+					sex:'',
+					name:'',
+					education:'',
+					pay:'',
+					medicalRecord:'',
+					telephone:'',
+					awardStatus:'',
+					result1: '',
+					result2: '',
+					result3: '',
+					result4: '',
+					result5: '',
+					result6: '',
+					result7: '',
+					result8: '',
+					result9: '',
+					result10: '',
+					result11: '',
+					result12: '',
+					result13: '',
+					result14: '',
+					result15: '',
+					result16: '',
+					result17: '',
+					result18: '',
+					result19: '',
+					result20: '',
+					result21: '',
+					result22: '',
+					result23: '',
+					result24: '',
+					result25: '',
+					result26: '',
+					result27: '',
+					result28: '',
+					result29: '',
+					result30: '',
+					result31: '',
+					result32: '',
+					result33: '',
+					result34: '',
+					result35: '',
+					result36: '',
+					result37: '',
+					result38: '',
+					result39: '',
+					result40: '',
+					result41: '',
+					result42: '',
+					result43: '',
+					result44: '',
+					result45: '',
+					result46: '',
+					result47: '',
+					result48: '',
+					result49: '',
+					result50: ''
+				}
+				
+				page.jumpTopicFlag = [];
+				page.jumpSubject = [];
+				
+				
+				progressEvent();
+			}
+			
+			function toSelectHospital(){
+				page.positionFlag = "1";
+				$('#record').hide();
+				$('#selectHospital').show();
+			}
+			function progressEvent(){
+				//handle next button
+				var rlen = $('.require-star').length;
+				if(page.nextFlag.length() >= 2 || page.nextFlag.length() >= rlen){
+					$('.next').removeClass('disabled');
+					$('.next').removeAttr('disabled');
+				}else{
+					$('.next').addClass('disabled');
+					$('.next').attr('disabled','disabled');
+				}
+				
+				var is = $('#subjectContainer .active');
+				var size = is.length;
+				var islen = 0;
+				var checkTempFlag = true;
+				for(var i = 0;i < size;i++){
+					var domItem = $(is[i]);
+					if(domItem.hasClass('checkbox') && checkTempFlag){
+						islen++;
+						checkTempFlag = false;
+					}
+					
+					if(!domItem.hasClass('checkbox')){
+						islen++;
+					}
+				}
+				if(islen >= 2){
+					$('.next').removeClass('disabled');
+					$('.next').removeAttr('disabled');
+				}
+				
+				if(page.progressFlag.length() == 0){
+					$('.progress-bar .yellow').css('width','0%');
+					$('#progressBarText').text('0%');
+					return;
+				}
+				var size = getSubjectSize();
+				var p = Math.floor(page.progressFlag.length() / size * 100);
+				p = p > 100 ? 100 : p;
+				$('.progress-bar .yellow').css('width',p + '%');
+				$('#progressBarText').text(p + '%');
+				if(p == 100){
+					$('#submit').addClass('active').removeAttr('disabled');
+				}else{
+					$('#submit').removeClass('active').attr('disabled','disabled');
+				}
+
+			}
+			
+			function getSubjectSize(){
+				var size = 0;
+				for(var i = 0;i < subjects.length; i++){
+					var item = subjects[i];
+					if(item.isMust == '1' && Common.isEmpty(item.isProgress)){
+						size++;
+					}
+				}
+				size = size - page.jumpSubject.length
+				return size;
+			}
+			function init(){
+				initSelectHospital();
+				var url = Common.interfacePrefix() + page.url;
+				var id = Common.getParameter('id');
+				page.saveData.channelCode = Common.getParameter('channelCode');
+				var data = {
+					id:id,
+					state:Common.getParameter('state'),
+					code:Common.getParameter('code')
+				}
+				Common.ajax(url,data,true,function(result){
+					if(result.resultCode == "0"){
+						//var result = JSON.parse(localStorage.getItem("result"));
+						page.saveData.questionType = result.dataMap.questionType;
+						var data = result.data;
+						loadData(data);
+						initPage();
+						
+						if(Common.isEmpty(result.dataMap.hospitalName)){
+							loadPositionHos();
+							return;
+						}
+						$('#selHospitalBtn').text(result.dataMap.hospitalName);
+						
+						page.saveData.hospitalId = result.dataMap.hospitalId;
+						page.saveData.openid = result.dataMap.openid;
+						page.pflag.afidSelectHospital = result.dataMap.hospitalName;
+						page.nextFlag.afidSelectHospital = result.dataMap.hospitalName;
+						progressEvent();
+					}
+				})
+			}
+			
+			function initSelectHospital(){
+				
+				var selHos = {};
+				selHos.hospitalId = Common.getParameter('hospitalId');
+				selHos.hospitalName = decodeURIComponent(getQueryString('hospitalName'));
+				selHos.openid = Common.getParameter('openid');
+				if(Common.isEmpty(selHos.hospitalId)){
+					//loadPositionHos();
+					return;
+				}
+				$('#selHospitalBtn').text(selHos.hospitalName);
+				
+				page.saveData.hospitalId = selHos.hospitalId;
+				page.saveData.openid = selHos.openid;
+
+				page.pflag.afidSelectHospital = selHos.hospitalName;
+				page.nextFlag.afidSelectHospital = selHos.hospitalName;
+			}
+			function getQueryString(key){
+		        var reg = new RegExp("(^|&)"+key+"=([^&]*)(&|$)");
+		        var result = window.location.search.substr(1).match(reg);
+		        return result?decodeURIComponent(result[2]):null;
+		     }
+			
+			function loadData(data){
+				
+				//change title
+				$('#title').text(data.name);
+				if(Common.isIosScreen()){
+			        var $body = $('body');
+			        document.title = data.name;
+			        var $iframe = $('<iframe src="/favicon.ico"></iframe>');
+			        $iframe.on('load',function() {
+			            setTimeout(function() {
+			                $iframe.off('load').remove();
+			            }, 0);
+			        }).appendTo($body);
+				}
+				
+				//init hospitals
+				page.hospitals = [];
+				var tmpArea = '';
+				var tmpAreaObj = {};
+				for(var i = 0;i < data.manageHospitalList.length; i++){
+					var item = data.manageHospitalList[i];
+					if(tmpArea != item.areaName){
+						if(tmpArea != ''){
+							page.hospitals.push(tmpAreaObj);
+						}
+						tmpAreaObj = {
+							area:item.areaName,
+							hospitals:[]
+						}
+						tmpArea = item.areaName;
+					}
+					tmpAreaObj.hospitals.push(item);
+					if((i+1) == data.manageHospitalList.length){
+						page.hospitals.push(tmpAreaObj);
+					}
+				}
+				initHospital();
+				
+				//init type
+				subjects[1].options = [];
+				headSubjects[1].options = [];
+				for(i in data.manageQuestionList){
+					var item = data.manageQuestionList[i];
+					if(item.questionType == "patient"){
+						item.isMust = '1';
+						item.option = item.typeName;
+						subjects[1].options.push(item);
+						headSubjects[1].options.push(item);
+					}
+					
+				}
+				
+			}
+			function initPage(){
+				$('#subjectContainer').empty();
+				var currentSubjects = [];
+				var s2 = subjects[page.pageIndex * page.pageSize - 1];
+				var s1 = subjects[page.pageIndex * page.pageSize - 2];
+				if(!Common.isEmpty(s2.isDomFix) && Common.isEmpty(s1.isDomFix)){
+					currentSubjects.push(s1);
+				}else{
+					currentSubjects.push(s1);
+					currentSubjects.push(s2);
+				}
+				for(var index = 0; index < currentSubjects.length ; index++){
+					var item = currentSubjects[index];
+					if(Common.isEmpty(item)){
+						break;
+					}
+					var answer = item.options;
+					var subjectItemHtml = '';
+					var no = item.topicNumber;
+					var require = '';
+					
+					if(!Common.isEmpty(item.isDomFix)){
+						subjectItemHtml += '<div class="subject-item"><div class="subject-title"><b>本次为匿名调查，需要提供部分个人信息，用于后续的问卷分析。</b></div></div>';
+					}
+					
+					if(item.isMust == '1'){
+						require = '<span style="color:red;" class = "require-star">*</span>';
+					}
+					
+					var dot = ".";
+					if(Common.isEmpty(item.topic)){
+						dot = "";
+					}
+					
+					if(isSkip(item.topicNumber)){
+						if(item.isMust == "1"){
+							require = '<span style="color:red;" class = "require-star-empty">*</span>';
+						}
+						subjectItemHtml += '<div class="subject-item" afid = "'+item.topicNumber+'">'+
+							'<div class="subject-title-skip">'+
+								'<span class = "topicNumber">' + no + '</span>' + dot + item.topic +
+							 require + '</div>'+
+							'<div class="subject-answer-container-skip">';	
+					}else{
+						subjectItemHtml += '<div class="subject-item" afid = "'+item.topicNumber+'">'+
+							'<div class="subject-title">'+
+								'<span class = "topicNumber">' + no + '</span>' + dot + item.topic +
+							require + '</div>'+
+							'<div class="subject-answer-container">';
+					}
+					
+							
+					if(item.type == '1'){
+						if(answer.length >= 10){
+							if(isSkip(item.topicNumber)){
+								subjectItemHtml += '<div><select class = "r-select" afid="'+ item.topicNumber +'" disabled = "disabled"><option value = "-1">请选择</option>';
+							}else{
+								subjectItemHtml += '<div><select class = "r-select" afid="'+ item.topicNumber +'"><option value = "-1">请选择</option>';
+							}
+							for(i in answer){
+								var ansitem = answer[i];
+								ansitem.isMust = item.isMust;
+								ansitem.topicNumber = item.topicNumber;
+								var uuid = getDomUUid(ansitem.uuid);
+								subjectItemHtml += '<option  dataid = "'+ uuid +'" value="'+ ansitem.optionNumber +'">'+ ansitem.option +'</option>';
+								page.uuids[uuid] = ansitem;
+							}
+							subjectItemHtml += '</select></div></div></div>';
+						}else{
+							for(i in answer){
+								var ansitem = answer[i];
+								ansitem.isMust = item.isMust;
+								ansitem.topicNumber = item.topicNumber;
+								var uuid = getDomUUid(ansitem.uuid);
+								subjectItemHtml += '<div dataid = "'+ uuid +'"><i class="radio" index = "'+ i +'"></i> '+ ansitem.option +'</div>';
+								page.uuids[uuid] = ansitem;
+								
+							}
+							subjectItemHtml += '</div></div>';
+						}
+					}else if(item.type == '3'){
+						var uuid = getDomUUid(item.uuid);
+						page.uuids[uuid] = item;
+						subjectItemHtml += '<div style="position:relative;"><input dataid = "'+ uuid +'" afid = "'+item.topicNumber+'" class = "weiwei-input" placeholder = "请输入'+ item.topic +'"/></div>';
+						if(!Common.isEmpty(item.requireValidate)){
+							subjectItemHtml += '<div style="position:relative;"><input class = "mvalidate-input" value = "' + page.saveData.smsCode +'"/><button class="get-validate-btn" type = "button">获取验证码</button></div>';
+						}
+						subjectItemHtml += '<div></div>';
+					}else if(item.type == '5'){
+						subjectItemHtml += '<div><button type = "button" id = "selHospitalBtn" class = "select-hospital" onclick = "toSelectHospital()">选择医院</button></div>';
+						subjectItemHtml += '<div></div>';
+						
+					}else if(item.type == '4'){
+						subjectItemHtml += '<div><select class = "r-select" afid="'+ item.topicNumber +'"><option value = "-1">请选择</option>';
+						for(i in answer){
+							var ansitem = answer[i];
+							subjectItemHtml += '<option value="'+ ansitem.option +'">'+ ansitem.option +'</option>';
+						}
+						subjectItemHtml += '</select></div></div></div>';
+					}else if(item.type == '2'){
+						for(i in answer){
+							var ansitem = answer[i];
+							var uuid = getDomUUid(ansitem.uuid);
+							subjectItemHtml += '<div dataid = "'+ uuid +'"><i class="checkbox" index = "'+ i +'"></i> '+ ansitem.option +'</div>';
+							page.uuids[uuid] = ansitem;
+							ansitem.uuid = uuid;
+							
+						}
+					}else{
+						
+					}
+
+
+
+					$('#subjectContainer').append(subjectItemHtml);
+				}
+				changeModuleStatus();
+				changeNextButton();
+				initEvent();
+			}
+			
+			function isSkip(topicNumber){
+				for(var i = 0;i < page.jumpSubject.length ; i++){
+						var item = page.jumpSubject[i];
+						if(item == topicNumber){
+							return true;
+						}
+				}
+				return false;
+			}
+			function changeModuleStatus(){
+				var ps = $('i.radio:visible').parent().parent().parent();
+				for(var i = 0; i < ps.length ; i++){
+					var item = $(ps[i]);
+					var afid = item.attr('afid');
+					var index = page.pflag['afid' + afid];
+					item.find('i.radio[index="'+ index +'"]').addClass('active');
+				}
+				
+				var checkboxs = $('i.checkbox:visible').parent().parent().parent();
+				var checkLen = checkboxs.length;
+				for(var i = 0; i < checkLen; i++){
+					var item = $(checkboxs[i]);
+					var afid = item.attr('afid');
+					var checkboxs = page.pflag['afid' + afid];
+					for(index in checkboxs){
+						var citem = checkboxs[index];
+						item.find('i.checkbox[index="'+ citem +'"]').addClass('active');
+					}
+				}
+				
+				var ins = $('.weiwei-input:visible');
+				for(var i = 0; i < ins.length ; i++){
+					var item = $(ins[i]);
+					var afid = item.attr('afid');
+					item.val(page.pflagtemp['afid' + afid]);
+					if(!Common.isEmpty(page.pflagtemp['afid' + afid])){
+						item.addClass('active');
+					}
+				}
+
+				var sels = $('.r-select:visible');
+				for(var i = 0; i < sels.length ; i++){
+					var item = $(sels[i]);
+					var afid = item.attr('afid');
+					if(!Common.isEmpty(page.pflag['afid' + afid])){
+						item.val(page.pflag['afid' + afid]);
+						item.addClass('active');
+						delFirstchild(item);
+					}
+
+				}
+
+				//TODO
+				if(!Common.isEmpty(page.pflag.afidSelectHospital)){
+					$('#selHospitalBtn').text(page.pflag.afidSelectHospital);
+					$('#selHospitalBtn').addClass('active')
+				}
+			}
+			function delFirstchild($sel){
+				var child = $($sel.children()[0]);
+				var v = child.text();
+				var afid = $sel.attr('afid');
+				if(v.indexOf('请选择') != -1){
+					child.remove();
+				}
+			}
+			function changeNextButton(){
+				page.nextFlag = {
+					length:function(){
+						var index = 0;
+						for(i in this){
+							index++;
+						}
+						index--;
+						return index;
+					}
+				};
+				
+				var totalPage = subjects.length % page.pageSize == 0 ? Math.floor(subjects.length / page.pageSize) : Math.floor(subjects.length / page.pageSize) + 1;
+				if(page.pageIndex == 1){
+					$('.prev').hide();
+					$('.next').addClass('block');
+				}else{
+					$('.next').removeClass('block');
+					$('.prev').show();
+					
+					if(page.pageIndex >= totalPage){
+						$('.submit-container').show();
+						$('#submit').addClass('active').removeAttr('disabled');
+						var v = $('.mvalidate-input').parent().parent().find('.weiwei-input').val();
+						var validatev = $('.mvalidate-input').val();
+						if(!Common.isEmpty(v) && Common.isEmpty(validatev)){
+							$('#submit').removeClass('active').attr('disabled','disabled');
+						}else{
+							$('#submit').addClass('active').removeAttr('disabled');
+						}
+						$('.step-container').hide();
+					}else{
+						$('.submit-container').hide();
+						$('.step-container').show();
+					}
+				}
+				
+				var rlen = $('.require-star').length;
+				if(rlen == 0){
+					$('.next').removeClass('disabled');
+					$('.next').removeAttr('disabled');
+				}
+				
+				var is = $('#subjectContainer .active');
+				var size = is.length;
+				var islen = 0;
+				var checkTempFlag = true;
+				for(var i = 0;i < size;i++){
+					var domItem = $(is[i]);
+					if(domItem.hasClass('checkbox') && checkTempFlag){
+						islen++;
+						checkTempFlag = false;
+					}
+					
+					if(!domItem.hasClass('checkbox')){
+						var rsdom = domItem.parent().parent().parent().find('.require-star');
+						if(rsdom.length != 0){
+							islen++;
+						}
+					}
+				}
+				
+				if(islen >= rlen){
+					$('.next').removeClass('disabled');
+					$('.next').removeAttr('disabled');
+				}
+
+			}
+			function saveData(){
+				var url = Common.interfacePrefix() + page.saveUrl;
+				if(Common.isEmpty(page.saveData.imageCode)){
+					Common.tips('请填写图形验证码！');
+					return;
+				}
+				if(Common.isEmpty(page.saveData.telephone)){
+					$("#imgs2").hide();
+					$("#zhuicha").hide();
+				}
+				var json = {
+					imageCode:page.saveData.imageCode,
+					smsCode:page.saveData.smsCode,
+					data:JSON.stringify(page.saveData)
+				}
+				Common.ajax(url,json,true,function(result){
+					if(result.resultCode == "0"){
+						$('#pageSuccessTips').html(result.resultMsg);
+						cancel();
+						$('#successPage').show();
+						$('#record').hide();
+					}else if(result.resultCode == "101"){
+						Common.tips(result.resultMsg);
+					}else{
+						Common.tips(result.resultMsg);
+						cancel();
+					}
+				})
+			}
+			function next(){
+				$('.next').addClass('disabled');
+				$('.next').attr('disabled','disabled');
+				page.pageIndex++;
+				initPage();
+				
+			}
+			function prev(){
+				$('.next').addClass('disabled');
+				$('.next').attr('disabled','disabled');
+				//$('.next').removeClass('disabled');
+				//$('.next').removeAttr('disabled');
+				page.pageIndex--;
+				initPage();
+			}
+
+			function initHospital(){
+				var hospitals = page.hospitals;
+				for(i in hospitals){
+					var item = hospitals[i];
+					item.text = item.area;
+				}
+				var o = {
+					sid:'areaSelect',
+					data:hospitals
+				}
+				QSSelect.init(o,function(obj){
+					var v = QSSelect.getSelectText(o.sid);
+					for(var i = 0; i < hospitals.length; i++){
+						var item = hospitals[i];
+						if(item.area == v){
+							var hos = item.hospitals;
+							$('#hospitalContainer').empty();
+							for(var j = 0; j < hos.length; j++){
+								var hitem = hos[j];
+								var uuid = getDomUUid(hitem.uuid);
+								page.uuids[uuid] = hitem;
+								$('#hospitalContainer').append('<div dataid = "'+uuid+'"><div>'+ hitem.hospitalName +'</div></div>');
+							}
+						}
+					}
+					hospitalEvent();
+				})
+				$('#areaSelect .option:eq(0)').click();
+			}
+			function hospitalEvent(){
+				$('.hospital-container > div').on('click',function(){
+					var self = $(this);
+					$('.hospital-container > div').removeClass('active')
+					self.addClass('active');
+					$('#selHospitalBtn').text(self.text());
+					$('#selectHospital').hide();
+					$('#record').show();
+					
+					var dataid = self.attr('dataid');
+					var data = page.uuids[dataid];
+					page.saveData.hospitalId = data.hospitalId;
+
+					page.pflag.afidSelectHospital = self.text();
+					page.nextFlag.afidSelectHospital = self.text();
+					progressEvent();
+				});
+			}
+			
+			function cancel(){
+				$('#validateContainer').hide();
+				$('#validateInput').val('');
+			}
+			function showValidate(){
+				reloadValidate();
+				$('#validateContainer').show();
+			}
+			function ok(){
+				$(".mvalidate-input").focus();
+				$(".mvalidate-input").blur();
+				saveData();
+			}
+			
+			function getLocation(){
+			  	/*if (navigator.geolocation){
+			    	navigator.geolocation.getCurrentPosition(showPosition,null,{enableHighAcuracy:true});
+			  	}else{
+			  		alert("Geolocation is not supported by this browser.");
+			  	}*/
+			  	var map = new BMap.Map("allmap");
+			  	var geolocation = new BMap.Geolocation();
+				geolocation.getCurrentPosition(function(r){
+					if(this.getStatus() == BMAP_STATUS_SUCCESS){
+						var mk = new BMap.Marker(r.point);
+						map.addOverlay(mk);
+						map.panTo(r.point);
+						showPosition({latitude:r.point.lat,longitude:r.point.lng});
+					}
+					else {
+						alert('failed'+this.getStatus());
+					}        
+				},{enableHighAccuracy: true})
+		  	}
+			function showPosition(position){
+				//var currLatitude = position.coords.latitude;
+				//var currLongitude = position.coords.longitude;
+				var currLatitude = position.latitude;
+				var currLongitude = position.longitude;
+				if(Common.isEmpty(currLatitude)){
+					return;
+				}
+				
+				var url = Common.interfacePrefix() + page.posUrl;
+				var data = {
+					latitude:currLatitude,
+					longitude:currLongitude
+				}
+				Common.ajax(url,data,false,function(result){
+					if(result.isSuccess){
+						var selHos = result.data;
+						if(page.positionFlag != "1"){
+							$('#selHospitalBtn').text(selHos.name);
+							page.saveData.hospitalId = selHos.id;
+							page.pflag.afidSelectHospital = selHos.name;
+							page.nextFlag.afidSelectHospital = selHos.name;
+							progressEvent();
+						}
+						
+					}
+				})
+				
+				/*var baseLatitude = 39.976888;
+				var baseLongitude = 116.335404;
+				var baseName = '新协和医院';
+				var dist = 0.01;///1000m
+				var list = [];
+				for(var i = 1;i < 10; i++){
+					list.push({
+						hospitalName:'新协和医院-A-'+ i,
+						latitude:39.976888 + dist * i,
+						longitude:116.335404
+					});
+					list.push({
+						hospitalName:'新协和医院-B-'+ i,
+						latitude:39.976888,
+						longitude:116.335404 + dist * i
+					});
+					list.push({
+						hospitalName:'新协和医院-C-'+ i,
+						latitude:39.976888 - dist * i,
+						longitude:116.335404
+					});
+					list.push({
+						hospitalName:'新协和医院-D-'+ i,
+						latitude:39.976888 ,
+						longitude:116.335404 - dist * i
+					});
+				}
+				window.a = list;
+				
+				
+				var minDist = null;
+				for(var i = 0; i < list.length; i++){
+					var item = list[i];
+					var vdist = Math.sqrt(Math.pow(item.latitude - currLatitude,2) + Math.pow(item.longitude - currLongitude,2));
+					item.vdist = vdist;
+					if(minDist == null){
+						minDist = item;
+					}else{
+						if(vdist < minDist.vdist){
+							minDist = item;
+						}
+					}
+				}*/
+				//alert(minDist.hospitalName)
+			}
+			function loadPositionHos(){
+				getLocation();
+			}
+
+		</script>
+
+	</head>
+	<body>
+		<div class="hjk-container" id="record">
+			<div class="hjk-content" style="top: 0;">
+				<div class="progress-bar-container">
+					<div class="progress-bar">
+						<div class="yellow"></div>
+					</div>
+					<div class="progress-bar-text" id = "progressBarText">0%</div>
+				</div>
+				<div class="subject-container" id = "subjectContainer">
+					<!--<div class="subject-item">
+						<div class="subject-title">
+							1.就fid激发大家爱放进嗲积分i打飞机奥德赛
+						</div>
+						<div class="subject-answer-container">
+							<div>
+								<i class="radio"></i>
+								家爱放进嗲
+							</div>
+							<div>
+								<i class="radio active"></i>
+								家爱放进嗲
+							</div>
+							<div>
+								家爱放进嗲
+							</div>
+							<div>
+								家爱放进嗲
+							</div>
+						</div>
+					</div>-->
+				</div>
+				<div class="submit-container resizeFix">
+					<button type="button" class="prev" onclick="prev()">上一页</button>
+					<button type="button" id="submit" class="submit" onclick="showValidate()">提交</button>
+				</div>
+				<div class="step-container resizeFix">
+					<button type="button" class="prev" onclick="prev()">上一页</button>
+					<button type="button" class="next disabled" onclick="next()" disabled="disabled">下一页</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="hjk-container" style="display: none;" id="selectHospital">
+			<div class="area-container">
+				<div style="z-index: 3;position: fixed;top: 0.5rem;left: 1rem;">请先选择医院所在省份</div>
+				<select id = "areaSelect">请选择区域</select>
+			</div>
+			<div class="hospital-container" id = "hospitalContainer">
+				<!--<div class="active"><div>eweqeq</div></div>-->
+			</div>
+		</div>
+
+		<div class="hjk-container validate-container" id="validateContainer">
+			<div class="bg"></div>
+			<div class="validate-frame-container">
+				<div>
+					<img class="validate-bg" src="imgs/validate.png"/>
+					<img id = "validateImg" onclick="reloadValidate()"  class="validate-img" onerror="Common.tips('服务器繁忙,请稍后再试');"/>
+					<input  class="validate-input" onblur = "saveImageCode()" id = "validateInput"/>
+					<div class="cancel" onclick="cancel()"></div>
+					<div class="ok" onclick="ok()"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="hjk-container success-container" id="successPage">
+			<div class="success-frame">
+				<img src="imgs/icon_success.png" style="width: 28%;margin-top: 20%;margin-bottom: 8%;"/>
+				<div style="color: #333;font-size: 0.9rem;margin-bottom: 0.7rem;">感谢您的参与！</div>
+				<div style="color: #808080;font-size: 0.75rem;height:16%;padding: 0 13%;" id = "pageSuccessTips"></div>
+				<div style = "background: #F2F3F6;height: 16px;" id="zhuicha">
+					
+				</div>
+				<img src="imgs/commity_down.png" style="width: 100%;" id="imgs2"/>
+			</div>
+		</div>
+		<div id="allmap" style="display: none;"></div>
+	</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<!-- 注意修改项 -->
+
+		<title id = "title"></title>
+
+		<link rel="stylesheet" href="css/common.css" />
+		<link rel="stylesheet" href="css/c.css" />
+
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js" ></script>
+		<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js" ></script>
+		<script src="https://api.map.baidu.com/api?v=2.0&ak=iLGV96k58C2lvv3joHvVGog9&s=1" type="text/javascript"></script>
+		<script type="text/javascript" src="js/common.js" ></script>
+		<script type="text/javascript" src="js/fastclick.js" ></script>'
+		<style>
+			#recordContainer{
+				position: absolute;
+			    top: 0;
+			    left: 0;
+			    right: 0;
+			    bottom: 0;
+			    overflow: hidden;
+			}
+			#recordContainer iframe{
+				width: 100%;
+				height: 100%;
+				border: none;
+			}
+		</style>
+		
+		<script type="text/javascript">
+			$(function(){
+				var index = sessionStorage.getItem("index");
+				sessionStorage.setItem('tempflat','1');
+				if(index == "index"){
+					//initWxJssdk(null);
+					//return;
+				}
+				init();
+			});
+			
+			function init(){
+				/*var url = Common.interfacePrefix() + '/s/wechat/question/getManageById';*/
+				var url = 'http://localhost:3000/getManageById';
+				var id = Common.getParameter('id');
+				var data = {
+					id:id,
+					state:Common.getParameter('state'),
+					code:Common.getParameter('code')
+				}
+				Common.ajax(url,data,true,function(result){
+					if(result.resultCode == "0"){
+						var data = result.data;
+                        console.log(data);
+                        var dataMap = result.dataMap;
+						localStorage.setItem("result",JSON.stringify(result));
+						localStorage.setItem("id",data.id);
+						$('#title').text(result.data.name);
+						//initWxJssdk(dataMap);
+						if(dataMap.questionType == "patient"){
+							if(data.id == '2'){
+								$("#recordIframe").attr("src","all/record.html");
+							}else{
+								$("#recordIframe").attr("src","record.html");
+							}
+						}else{
+							$("#recordIframe").attr("src","test.html");
+						}
+						setTimeout(function(){
+							$("#recordContainer").show();
+							$("#loadingModule").hide();
+							$("#record").hide();
+						},1000);
+						
+					}
+				})
+			}
+			
+			function initWxJssdk(dataMap){
+				var wxDataMap = JSON.parse(localStorage.getItem("wxDataMap"));
+				if(wxDataMap != null){
+					wx.config({
+					    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+					    appId: wxDataMap.appId, // 必填，公众号的唯一标识
+					    timestamp: wxDataMap.timestamp, // 必填，生成签名的时间戳
+					    nonceStr: wxDataMap.nonceStr, // 必填，生成签名的随机串
+					    signature: wxDataMap.signature,// 必填，签名，见附录1
+					    jsApiList: ['closeWindow'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+					});
+					wx.ready(function(){
+						wx.closeWindow();
+					});
+				}else{
+					localStorage.setItem("wxDataMap",JSON.stringify(dataMap));
+				}
+				
+			}
+			
+		</script>
+
+	</head>
+	<body>
+		<div style="text-align: center;position: fixed;top: 30%;width: 100%;z-index: 3;" id = "loadingModule">
+			<img src="imgs/loading.gif" style="width: 6rem;opacity: 0.9;" />
+		</div>
+		<div class="hjk-container" id="record" >
+			<div class="hjk-content" style="top: 0;">
+				<div class="progress-bar-container">
+					<div class="progress-bar">
+						<div class="yellow"></div>
+					</div>
+					<div class="progress-bar-text" id = "progressBarText">0%</div>
+				</div>
+				<div class="subject-container" id = "subjectContainer">
+				</div>
+				<div class="submit-container resizeFix">
+					<button type="button" class="prev" onclick="prev()">上一页</button>
+					<button type="button" id="submit" class="submit" onclick="showValidate()">提交</button>
+				</div>
+				<div class="step-container resizeFix">
+					<button type="button" class="prev" onclick="prev()">上一页</button>
+					<button type="button" class="next disabled" onclick="next()" disabled="disabled">下一页</button>
+				</div>
+			</div>
+		</div>
+		<div class="hjk-container" id="recordContainer">
+			<iframe style="" src="" id = "recordIframe"></iframe>
+			
+		</div>
+	</body>
+</html>

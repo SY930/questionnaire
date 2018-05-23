@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<!-- 注意修改项 -->
+		<link rel="stylesheet" href="css/common.css" />
+
+		<title id = "title">国家医管中心</title>
+		<style>
+			body{
+				background: white;
+			}
+			.f-content{
+				position: absolute;
+			    top: 4.2rem;
+			    right: 0;
+			    bottom: 0;
+			    left: 0;
+			    padding: 3rem 1.8rem 0 1.8rem;
+			}
+			.f-content > div{
+				float: left;
+				width: 50%;
+				text-align: center;
+				margin-bottom: 1.6rem;
+				cursor: pointer;
+			}
+			.f-header{
+				background-color: #FDEFDA;
+			    height: 84px;
+			    color: #EEAD4D;
+			    padding: 0.7rem 0.7rem;
+			    font-size: 0.75rem;
+			    line-height: 1rem;
+			}
+		</style>
+		<script>
+			function getParameter(key){
+				var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r != null) return unescape(r[2]);
+				return null;
+			}
+			function toIndex(p){
+				if(p == '1'){
+					location.href = "http://ccdas.ipmph.com/";
+				}else if(p == '2'){
+					location.href = "http://pharmacy.ipmph.com/wx/index.html";
+				}else{
+					location.href = "https://www.ehealthship.com/index.zhtml";
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div class="hjk-container">
+			<div class="f-header">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;以下服务由人民卫生出版社有限公司提供，国家卫生计生委医疗管理服务指导中心不对具体内容承担相关责任。请用户自行选择使用。
+			</div>
+			<div class = "f-content">
+				<div onclick="toIndex('1')">
+					<img src="imgs/chmCenter/img_logo1.png" />
+					<div>人卫临床助手</div>
+				</div>
+				<div onclick="toIndex('2')">
+					<img src="imgs/chmCenter/img_logo2.png" />
+					<div>人卫用药助手</div>
+				</div>
+				<div onclick="toIndex('3')">
+					<img src="imgs/chmCenter/img_logo3.png" />
+					<div>人卫约健康</div>
+				</div>
+			</div>
+			<!--<div class = "f-footer">
+				<img src="imgs/front/f-ftext.png"  style="height: 72%;"/>
+			</div>-->
+		</div>
+	</body>
+</html>

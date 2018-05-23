@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+		<!-- 注意修改项 -->
+		<base href="../">
+		<title id="title">用药指导</title>
+
+		<link rel="stylesheet" href="css/common.css?v=11653ae465">
+		<link rel="stylesheet" href="css/c.css?v=f404e2d194">
+
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js?v=f9c7afd057"></script>
+		<script type="text/javascript" src="js/common.js?v=2c9d01c118"></script>
+		
+		<style>
+			body{
+				background-color: #f9f9f9;
+			}
+			.type-name-container{
+				font-size: 1rem;
+			    color: #333;
+			    padding-top: 1rem;
+			    margin-bottom: 0.7rem;
+			    font-weight: bold;
+			}
+			.type-container{
+				clear: both;
+				background-color: white;
+				margin-bottom: 0.7rem;
+				padding-left: 1rem;
+			}
+			.type-name-container .match{
+				font-weight: bold;
+			}
+			.type-content > div{
+				color: #333333;
+			    display: inline-block;
+			    width: 100%;
+			    border-top: 1px solid #EEEEEE;
+			    padding: 0.7rem 0;
+			    font-size: 0.8rem;
+			}
+			.type-content > div:first-child{
+				border-top: none;
+			}
+		</style>
+		
+		<script type="text/javascript">
+			var data = [{type:"用药安全",list:[
+						"\“身体好\”也要吃药降胆固醇,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=e53274c524234cd99f6f18fe6ce014d4",
+						"他汀类药物的强弱选择,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=e4f6d20602bc46e9961f9170985d1648",
+						"为何要服药升高胆固醇？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=c7173a23396d4a128af4d17edb899d89",
+						"感染性腹泻用药方法,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=f1c2438658934f0e918f6c9d1fe73c25",
+						"胖子更易发生骨质疏松？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=708b2463eb974cd0bfb68154e1a3900a",
+						"四联疗法较三联的优势,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=4e8d2beeddc047a9ba8cef3f3bfc3e45"]},
+						{type:"专科用药",list:[
+						"雷洛昔芬的适用人群,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=4eb63df4b6e34e07b4c4739cf6d53fcd",
+						"老年痴呆症服药后无用？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=acf8c3bef10d4d9a86adba13f1921f61",
+						"保健品对老年痴呆症有用吗？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=54b70a4d26a1422eb7f38963708485f0",
+						"治疗帕金森的药物有哪些？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=2b634ded459d4fcfaefe99136b707f75",
+						"司来吉兰不能与哪些药物合用？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=70330319122a46918e992d7c47112795"]},
+						{type:"特殊人群",list:[
+						"儿童哮喘可以不用药自行恢复吗？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=df84aca268124c069f3e99c972c8aa9e",
+						"儿童退烧药有哪些？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=b7e07cbf00614cba89f653b9cd07d409",
+						"备孕期间，单纯吃含叶酸的食物就够了吗？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=c9e3e1aff25e4a84a07a54131803db50",
+						"妊娠期间，服用中药还是西药安全？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=fee2bbda0f764ee9b1e3c0086c868fb9",
+						"肺结核各类药物的用药疗程,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=01779470fd1742029d97da43e903f28f"]},
+						{type:"中医中药",list:[
+						"治疗失眠的中药怎么服用？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=1500b723c52749eeb1ecc16d8f9cdf2f",
+						"他汀类药物与中成药如何抉择？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=9ecfff2ebd134b61a790f1f5d5ed971f",
+						"感冒后头痛用什么中成药？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=06ddfad3b7ff458690e18840f52fb3ed",
+						"预防高原反应引起的头痛用何种中成药？,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=f2303fc7725744bf9edca638c216ee50",
+						"煎煮中药的方法,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=13808d6d8ae9406f926b933d10d30751",
+						"中药颗粒的有效期,http://pharmacy.ipmph.com/medicine/static/apppage/wenda_details.html?id=75445721b7fe4382805072bdb2dc427e"]}];
+			$(function(){
+				init();
+			})
+			function init(){
+				for(var i = 0;i < data.length;i++){
+					var item = data[i];
+					var doms = '<div class="type-container">'+
+								'<div class="type-name-container">'+
+									'<span class="type-name">'+item.type+'</span>'+
+								'</div>'+
+								'<div class="type-content">';
+					for(var j = 0;j < item.list.length;j++){
+						var litem = item.list[j].split(',');
+						var name = litem[0];
+						var url = litem[1];
+						doms += '<div onclick="location.href = \''+url+'\'">'+name+'</div>'
+					}
+					doms += '</div></div>';
+					$('.hjk-container').append(doms);
+				}
+			}
+		</script>
+
+	</head>
+	<body>
+		<div class="hjk-container">
+			<!--<div class="type-container">
+				<div class="type-name-container">
+					<span class = "match">-</span>
+					<span class="type-name">慢性病</span>
+					<span class = "match">-</span>
+				</div>
+				<div class="type-content">
+					<div>高血压</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+				</div>
+			</div>-->
+		</div>
+	</body>
+</html>

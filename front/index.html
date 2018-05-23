@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="description" content="" />
+<meta name="keywords" content="" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no,date=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="renderer" content="webkit">
+<link href="css/resit.css" rel="stylesheet" />
+<style>
+body{ background:#f0f0f0;}
+.title{ background: #6ca7e8; width: 100%; padding: 15px 0; }
+.title .logo{ text-align: center; }
+.title .logo img{ width: 33%;}
+.title h2,.title h4{ color:#fff; font-weight:normal; text-align:center;}
+.title h2{ font-size:20px;padding: 10px 0 0;}
+.title h4{ font-size:16px;  width: 60%; margin-left: 20%;}
+.nav_icon{ padding:15px;background:#fff;}
+.nav_icon li{ float:left;width:30%; margin-right:5%; text-align: center;}
+.nav_icon li a{ color:#fff; display: inline-block; padding: 6px 0;}
+.nav_icon li img{ height: 40px;}
+.bg_color1{ background-color:#f37d4f;}
+.bg_color2{ background-color:#5bacd7;}
+.bg_color3{ background-color:#69b092;}
+.bg{ margin:15px; margin-bottom: 50px;}
+.bg_1,.bg_2{width:100%; height:90px;}
+.bg_1{ background: url(images/bg1.png) no-repeat; background-size: 100% 90px; border-radius: 10px;margin-bottom: 10px; }
+.bg_2{ background: url(images/bg2.png) no-repeat;background-size: 100% 90px;border-radius: 10px; }
+.bg h2,.bg p{ color: #fff; font-weight: normal; margin-left: 20px;}
+.bg h2{ font-size: 20px;padding-top:6px;}
+.bg p{ font-size: 14px; padding: 2px 0 8px;}
+.bg a{  margin-left: 20px;font-size:12px;color: #000; background: #fff; border-radius: 4px; padding: 2px 14px;display: inline-block;}
+.bottom{ position: fixed; bottom: 0; width: 100%; color: #fff; font-size: 18px; line-height: 40px; text-align: center;
+  background:#fe4f4a;
+  background-image: -webkit-gradient(linear, left, right, from(rgb(246,221,79)), to(rgb(254,79,74)));
+  background-image: -webkit-linear-gradient(left, rgb(246,221,79), rgb(254,79,74));
+  background-image: -moz-linear-gradient(left, rgb(246,221,79), rgb(254,79,74));
+  background-image: -o-linear-gradient(left,rgb(246,221,79), rgb(254,79,74));
+  background-image: -ms-linear-gradient(left, rgb(246,221,79), rgb(254,79,74));
+  background-image: linear-gradient(left, rgb(246,221,79), rgb(254,79,74));
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType= 0 ,startColorstr='#fe4f4a', endColorstr='#f6dd4f')
+  }
+</style>
+<title>国家医管中心</title>
+</head>
+<body>
+    <div id="wrap">
+        <div class="title">
+            <div class="logo"><img src="images/Logo.png"></div>
+            <h2>国家卫生计生委医疗管理服务指导中心</h2>
+            <h4>National Center for Medical Service Administration</h4>
+        </div>
+        <ul class="clearfix nav_icon">
+            <li><a href="javascript:toPage('1');"><img src="images/icon001.png"><br>满意度</a></li>
+            <li><a href="javascript:toPage('2')"><img src="images/icon002.png"><br>患者安全</a></li>
+            <li><a href="javascript:toPage('3');"><img src="images/icon003.png"><br>合理用药</a></li>
+        </ul>
+        <div class="bg">
+            <div class="bg_1">
+                <h2>精读</h2>
+                <p>推送健康指南</p>
+                <a href="#">查看更多</a>
+            </div>
+            <div class="bg_2">
+                <h2>管理</h2>
+                <p>医疗大数据管理与分析</p>
+                <a href="#">查看更多</a>
+            </div>
+        </div>
+        <p class="bottom">欢迎访问国家医管中心</p>
+    </div>
+</body>
+<script src="js/jquery-3.1.0.min.js" type="text/javascript"></script>
+<script src="../js/common.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(function(){
+//首页图标背景颜色
+    $(".nav_icon li").each(function() {
+        var num = $(this).index()+1;
+		$(this).addClass("bg_color"+num);
+    });
+//首页图标有右间距
+	$(".nav_icon li:last").css("marginRight","0");
+})
+	function toPage(type){
+		if(type == '1'){
+			location.href = '../front.html?code=1';
+		}else if(type == '3'){
+			location.href = 'index2.html';
+		}else{
+			Common.tips('功能调试中..')
+		}
+	}
+</script>
+</html>

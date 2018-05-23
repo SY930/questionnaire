@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<!-- 注意修改项 -->
+		<title id = "title"></title>
+		<link rel="stylesheet" href="css/common.css" />
+
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js" ></script>
+		<script type="text/javascript" src="js/common.js" ></script>
+		
+		<style>
+			body{
+				background-color: #32befb;
+				text-align: center;
+			}
+			.title-container{
+				display: inline-block;
+				color: white;
+				margin-top: 1.8rem;
+			}
+			.img-container{
+				display: inline-block;
+				margin-top: 1.6rem;
+				width: 15rem;
+				background-color: white;
+				padding:0.8rem;
+				border-radius: 0.3rem;
+			}
+			.img-container img{
+				width: 100%;
+			}
+		</style>
+		<script type="text/javascript">
+			$(function(){
+				init();
+			})
+			function init(){
+				var url = Common.interfacePrefix() + "/pos/getHospitalQRcodeById";
+				var data = {
+					hospitalId:Common.getParameter("hospitalId")
+				}
+				Common.ajax(url,data,true,function(result){
+					if(result.isSuccess && !Common.isEmpty(result.data)){
+						$("#urlImgs").attr("src",result.data)
+					}else{
+					}
+				})
+			}
+		</script>
+
+	</head>
+	<body>
+		<div class="title-container">欢迎参加国家卫生计生委<div style="height: 0.3rem;"></div>医院患者满意度调查活动</div>
+		<div class="img-container">
+			<img src="imgs/qrcode.jpg" id="urlImgs"/>
+			<div style="color: #808080;margin-top:1rem;font-size: 0.75rem;">长按图片&nbsp;&nbsp;识别二维码</div>
+		</div>
+	</body>
+</html>

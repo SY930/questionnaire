@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<!-- 注意修改项 -->
+		<link rel="stylesheet" href="css/common.css" />
+
+		<title id = "title">满意度调查问卷</title>
+		<style>
+			body{
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				background-color: white;
+			}
+			.f-content{
+				position: absolute;
+				top: 0;
+				right: 0;
+				bottom: 3.5rem;
+				left: 0;
+				background-image: url(front/f-bg.png);
+				background-size: 100% 100%;
+			}
+			.f-footer{
+				height: 3.5rem;
+				text-align: center;
+				padding-top: 0.8rem;
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+			}
+			.hjk-container{
+				height: 100%;	
+				position: relative;
+			}
+			.f-btn{
+				width: 7rem;
+			    height: 2rem;
+			    background: transparent;
+			    border: 1px solid white;
+			    border-radius: 0.2rem;
+			    color: white;
+			    font-size: 0.8rem;
+			}
+		</style>
+		<script>
+			function getParameter(key){
+				var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r != null) return unescape(r[2]);
+				return null;
+			}
+			function toIndex(){
+				var code = getParameter('code');
+				var state = getParameter('state');
+				var tempflat = sessionStorage.getItem('tempflat');
+				if(tempflat == null){
+					location.href = "index.html?code=" + code + "&state=" + state;
+				}else{
+					alert('对不起，请关闭本页面后再开始答题。');
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div class="hjk-container">
+			<div class = "f-content">
+				<div style="text-align: center;padding-top: 13%;">
+					<img src="imgs/front/f-title.png" style="width: 50%;"/>
+				</div>
+				<div style="padding: 10%;text-align: center;">
+					<img src="imgs/front/f-tips.png" style="width: 100%;" />
+				</div>
+				<div style="text-align: center;position: relative;top: -5rem;">
+					<button class="f-btn" onclick="toIndex()">开始答题</button>
+				</div>
+			</div>
+			<div class = "f-footer">
+				<img src="imgs/front/f-ftext.png"  style="height: 72%;"/>
+			</div>
+		</div>
+	</body>
+</html>

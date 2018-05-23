@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<!-- 注意修改项 -->
+		<title id = "title">满意度调查样本收集日报</title>
+		<link rel="stylesheet" href="css/common.css" />
+
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js" ></script>
+		<script type="text/javascript" src="js/common.js" ></script>
+		
+		<style>
+			body{
+				background: white;
+			}
+			.report-tips{
+				height: 1.8rem;
+			    background: #F8D9AE;
+			    font-size: 13px;
+			    color: #A0702D;
+			    line-height: 13px;
+			    padding-top: 0.6rem;
+			    padding-left: 1rem;
+			}
+			.report-time-container{
+				height: 2.6rem;
+				background: #FFFFFF;
+				position: relative;
+			}
+			.report-time-container div{
+				position: absolute;
+				top: 0;
+				bottom: 0;
+			}
+			.report-time-container .time-container{
+				left: 3rem;
+				right: 3rem;
+				text-align: center;
+				font-size: 0.9rem;
+				color: #808080;
+				padding-top: 0.7rem;
+			}
+			.report-time-container .arrow-left{
+				left: 0;
+			    width: 3rem;
+			    background-image: url(imgs/arrow-left.png);
+			    background-repeat: no-repeat;
+			    background-size: 52%;
+			    background-position: center;
+			} 
+			.report-time-container .arrow-right{
+				right: 0;
+			    width: 3rem;
+			    background-image: url(imgs/arrow-right.png);
+			    background-repeat: no-repeat;
+			    background-size: 52%;
+			    background-position: center;
+			}
+			.tab-container{
+				height: 2.45rem;
+				background: #FFFFFF;
+				padding: 0 1rem;
+			}
+			.tab-container div{
+				float: left;
+				width: 25%;
+				height: 100%;
+				text-align: center;
+				font-size: 0.75rem;
+				color: #808080;
+				padding-top: 0.7rem;
+			}
+			.tab-container div.active{
+				border-bottom: 2px solid #4AA9FF;
+			}
+			.total-container{
+				height: 2.4rem;
+				text-align: right;
+				padding: 0.3rem 0.7rem;
+				background: #F9F9F9;
+			}
+			.hos-container{
+				width: 100%;
+				padding-left: 1rem;
+			}
+			.hos-item{
+				position: relative;
+				border-bottom:1px solid #EEEEEE;
+				padding: 1rem 0 0.7rem 0;
+				float: left;
+				width: 100%;
+			}
+			.hos-item div{
+				float: left;
+				height: 100%;
+				
+			}
+			.hos-name{
+				width: 75%;
+				font-size: 0.85rem;
+				color: #444444;
+			}
+			.hos-num{
+				width: 25%;
+			    font-size: 1.1rem;
+			    text-align: right;
+			    color: #4AA9FF;
+			    padding-right: 0.86rem;
+			}
+			.empty-container{
+				text-align: center;
+				padding-top: 3rem;
+			}
+			.empty-container img{
+				width: 6rem;
+				margin-bottom: 1rem;
+			}
+			.empty-container div{
+				font-size: 0.8rem;
+				color: #808080;
+			}
+		</style>
+		<script type="text/javascript">
+			var page = {
+				time:null,
+				data:null
+			}
+			$(function(){
+				init();
+				initEvent();
+			})
+			function init(){
+				reqData(Common.formatTime((new Date).getTime()));
+			}
+			function reqData(time){
+				var url = Common.interfacePrefix() + "/pos/getReport";
+				var data = {
+					manageId:Common.getParameter("manageId"),
+					time:time
+				}
+				Common.ajax(url,data,false,function(result){
+					if(result.isSuccess && !Common.isEmpty(result.data)){
+						page.data = result.data;
+						emptyRev();
+						loadData("total");
+					}else{
+						page.data = null;
+						emptyOper();
+					}
+				})
+			}
+			function emptyOper(){
+				if($('.empty-container').length > 0){
+					return;
+				}
+				$("#hosContainer").empty();
+				$('.total-container').hide();
+				$("#gap").show();
+				$('#hosContainer').append('<div><div class="empty-container">'+
+						'<img src="imgs/empty.png" />'+
+						'<div>今日数据尚未更新，请耐心等待！</div>'+
+					'</div>')
+			}
+			function emptyRev(){
+				$('.total-container').show();
+				$("#gap").hide();
+			}
+			function loadData(type){
+				if(Common.isEmpty(page.data)){
+					return;
+				}
+				emptyRev();
+				$("#hosContainer").empty();
+				var result = [];
+				for(var i = 0;i<page.data.length;i++){
+					var item = page.data[i];
+					if(Common.isEmpty(item.hospitalId)){
+						$("#total").text(item[type]);
+						continue;
+					}
+					result.push({hospitalName:item.hospitalName,num:item[type]})
+				}
+				sort(result);
+				for(var i = 0;i<result.length;i++){
+					var item = result[i];
+					$("#hosContainer").append('<div class="hos-item">'+
+						'<div class="hos-name">'+ item.hospitalName +'</div>'+
+						'<div class="hos-num">'+ item.num +'</div>'+
+					'</div>')
+				}
+			}
+			function sort(arr){
+				arr.sort(function(a,b){
+					return b.num - a.num;
+				})
+			}
+			function initEvent(){
+				$(".tab-container div").on('click',function(){
+					$(".tab-container div").removeClass('active')
+					$(this).addClass('active');
+				});
+				page.time = new Date().getTime();
+				var today = Common.formatTime(page.time);
+				$("#time").text(today)
+			}
+			function nextDay(){
+				page.time += 1000 * 60 * 60 * 24;
+				var today = Common.formatTime(page.time);
+				$("#time").text(today);
+				clearTab();
+				reqData($("#time").text());
+			}
+			function preDay(){
+				page.time -= 1000 * 60 * 60 * 24;
+				var today = Common.formatTime(page.time);
+				$("#time").text(today);
+				clearTab();
+				reqData($("#time").text());
+			}
+			function clearTab(){
+				$(".tab-container div").removeClass("active");
+				$("#totalTab").addClass("active");
+			}
+		</script>
+
+	</head>
+	<body>
+		<div class="hjk-container">
+			<div class="report-tips">
+				温馨提示：日报数据每天更新2次，13点和17点
+			</div>
+			<div class="report-time-container point5">
+				<div class="arrow-left" onclick="preDay();"></div>
+				<div class="time-container" id="time">
+					
+				</div>
+				<div class="arrow-right" onclick="nextDay()"></div>
+			</div>
+			<div class="tab-container">
+				<div class="active" onclick="loadData('total');" id = "totalTab">问卷总数</div>
+				<div onclick="loadData('zhuyuanTotal');">住院问卷</div>
+				<div onclick="loadData('menzhenTotal');">门诊问卷</div>
+				<div onclick="loadData('yuangongTotal');">员工问卷</div>
+			</div>
+			<div class="total-container">
+				<span style="color: #808080;font-size: 0.7rem;position: relative;top: -0.2rem;">合计</span>
+				<span style="font-size: 26px;color: #4AA9FF;" id = "total">3002</span>
+			</div>
+			<div style = "height:1rem;background-color: #F9F9F9;display: none;" id = "gap"></div>
+			<div class="hos-container" id = "hosContainer">
+				
+				<!--<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>
+				<div class="hos-item">
+					<div class="hos-name">北京第一医院</div>
+					<div class="hos-num">3002</div>
+				</div>-->
+			</div>
+		</div>
+	</body>
+</html>

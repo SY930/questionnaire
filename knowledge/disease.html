@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+    	<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+		<!-- 注意修改项 -->
+		<base href="../">
+		<title id="title">疾病知识</title>
+
+		<link rel="stylesheet" href="css/common.css?v=11653ae465">
+		<link rel="stylesheet" href="css/c.css?v=f404e2d194">
+
+		<script type="text/javascript" src="js/jquery-2.1.4.min.js?v=f9c7afd057"></script>
+		<script type="text/javascript" src="js/common.js?v=2c9d01c118"></script>
+		
+		<style>
+			.type-name-container{
+				font-size: 1rem;
+				color: #4097FB;
+				text-align: center;
+				padding-top: 1rem;
+				margin-bottom: 0.7rem;
+			}
+			.type-container{
+				clear: both;
+			}
+			.type-name-container .match{
+				font-weight: bold;
+			}
+			.type-content > div{
+				color: #333333;
+			    display: inline-block;
+			    float: left;
+			    width: 33.3%;
+			    border-bottom: 1px solid #EEEEEE;
+			    border-right: 1px solid #EEEEEE;
+			    text-align: center;
+			    padding: 1rem 0;
+			}
+			.type-content > div:first-child,.type-content > div:nth-child(2)
+			,.type-content > div:nth-child(3){
+				border-top: 1px solid #EEEEEE;
+			}
+			.type-name{
+				margin: 0 0.4rem;
+			}
+		</style>
+		
+		<script type="text/javascript">
+			var data = [{type:"慢性病",list:[
+							"高血压,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=11011",
+							"冠心病,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=11004",
+							"糖尿病,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=10850",
+							"哮喘,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=11089"]},
+						{type:"女性疾病",list:[
+							"宫颈炎,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=13780",
+							"阴道炎,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=13771",
+							"卵巢囊肿扭转,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=13878",
+							"宫外孕,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=13849",
+							"痛经,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=14345",
+							"更年期综合征,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=29855",
+							"子宫肌瘤,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=14005"]},
+						{type:"外科疾病",list:[
+							"痔疮,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=22695",
+							"股骨颈骨折,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=19866",
+							"肾结石,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=19733",
+							"肩周炎,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=20071",
+							"骨关节炎,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=11596",
+							"强直性脊柱炎,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=20007"]},
+						{type:"小儿疾病",list:[
+							"小儿腹泻,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=24269",
+							"小儿呕吐,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=24265"]},
+						{type:"口腔疾病",list:[
+							"智齿,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=30290",
+							"牙周炎,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=30239",
+							"牙齿变色,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=30194"]},
+						{type:"常见问题",list:[
+							"偏头痛,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=11672",
+							"骨质疏松,http://ccdas.ipmph.com/pcSearch/shareJump?type=disease&id=10882"]}];
+			$(function(){
+				init();
+			})
+			function init(){
+				for(var i = 0;i < data.length;i++){
+					var item = data[i];
+					var doms = '<div class="type-container">'+
+								'<div class="type-name-container">'+
+									'<span class = "match">-</span>'+
+									'<span class="type-name">'+item.type+'</span>'+
+									'<span class = "match">-</span>'+
+								'</div>'+
+								'<div class="type-content">';
+					for(var j = 0;j < item.list.length;j++){
+						var litem = item.list[j].split(',');
+						var name = litem[0];
+						var url = litem[1];
+						doms += '<div onclick="location.href = \''+url+'\'">'+name+'</div>'
+					}
+					doms += '</div></div>';
+					$('.hjk-container').append(doms);
+				}
+			}
+		</script>
+
+	</head>
+	<body>
+		<div class="hjk-container">
+			<!--<div class="type-container">
+				<div class="type-name-container">
+					<span class = "match">-</span>
+					<span class="type-name">慢性病</span>
+					<span class = "match">-</span>
+				</div>
+				<div class="type-content">
+					<div>高血压</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+					<div>冠心病</div>
+					<div>糖尿病</div>
+					<div>哮喘</div>
+				</div>
+			</div>-->
+		</div>
+	</body>
+</html>
